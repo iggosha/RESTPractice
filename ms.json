@@ -1,0 +1,18 @@
+{
+  "ms": [
+    {
+      "id": 1,
+      "name": "micro1",
+      "frameType": "frame1",
+      "voltage": 5.5,
+      "price": 1200
+    },
+    {
+      "id": 2,
+      "name": "micro1",
+      "frameType": "frame1",
+      "voltage": 5.5,
+      "price": 1200
+    }
+  ]
+}
