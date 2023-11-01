@@ -1,16 +1,1 @@
-[
-  {
-    "id": 1,
-    "name": "micro1",
-    "frameType": "frame1",
-    "voltage": 5.5,
-    "price": 1200
-  },
-  {
-    "id": 2,
-    "name": "micro1",
-    "frameType": "frame1",
-    "voltage": 5.5,
-    "price": 1200
-  }
-]
+[{"id":1,"name":"cab","frameType":"frame231","voltage":5.5,"price":1200},{"id":2,"name":"aba","frameType":"frame231","voltage":5.5,"price":1200},{"id":3,"name":"bac","frameType":"frame2","voltage":5.5,"price":1200}]

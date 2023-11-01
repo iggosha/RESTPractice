@@ -1,4 +1,4 @@
-package com.myrest.restpractice.entity;
+package com.myrest.restpractice.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Microscheme {
+public class Microchip {
 
     private long id;
     private String name;
