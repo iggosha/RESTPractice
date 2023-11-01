@@ -6,6 +6,7 @@ import java.util.Date;
 
 @Data
 public class GlobalError {
+
     private int status;
     private String message;
     private Date timestamp;

@@ -6,6 +6,7 @@ import java.util.Date;
 
 @Data
 public abstract class GlobalException extends RuntimeException {
+
     protected int status;
     protected String message;
     protected Date time;
