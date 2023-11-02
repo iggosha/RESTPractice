@@ -70,6 +70,15 @@ public class MainController {
         return getOkStatus(mcWithVoltageAmount);
     }
 
+    @PostMapping("/")
+    public ResponseEntity<List<Microchip>> createNewByList(
+            @RequestBody List<Microchip> microchipList) {
+        List<Microchip> microchipListCurr = gsonService.getListFromJson();
+        microchipListCurr.addAll(microchipList);
+        gsonService.putListToJson(microchipListCurr);
+        return getCreatedStatus(microchipListCurr);
+    }
+
     @PutMapping("/")
     public ResponseEntity<List<Microchip>> replaceFrameType(
             @RequestParam(name = "formerFrameType") String formerFrameType,
@@ -142,6 +151,12 @@ public class MainController {
     private ResponseEntity<List<Microchip>> getOkStatus(List<Microchip> microchipList) {
         return ResponseEntity
                 .status(HttpStatus.OK)
+                .body(microchipList);
+    }
+
+    private ResponseEntity<List<Microchip>> getCreatedStatus(List<Microchip> microchipList) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
                 .body(microchipList);
     }
 
