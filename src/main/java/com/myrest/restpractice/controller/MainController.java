@@ -24,7 +24,7 @@ public class MainController {
     @GetMapping("/{id}")
     public ResponseEntity<Microchip> getById(@PathVariable long id) {
         List<Microchip> microchipList = gsonService.getListFromJson();
-        Microchip microchip = getMcById(microchipList, id);
+        Microchip microchip = getMcFromListById(microchipList, id);
         return getOkStatus(microchip);
     }
 
@@ -53,6 +53,21 @@ public class MainController {
             default -> throw new InvalidRequestParametersException(sortField);
         };
         return getOkStatus(microchipList);
+    }
+
+    @GetMapping("/volt")
+    public ResponseEntity<Long> getAllByVoltage(
+            @RequestParam(name = "volt", required = false, defaultValue = "5.0") double voltage
+    ) {
+        List<Microchip> microchipList = gsonService.getListFromJson();
+        long mcWithVoltageAmount = microchipList
+                .stream()
+                .filter(microchip -> microchip.getVoltage() >= voltage)
+                .count();
+        if (mcWithVoltageAmount == 0) {
+            return getNoContentStatusForNumber();
+        }
+        return getOkStatus(mcWithVoltageAmount);
     }
 
     @PutMapping("/")
@@ -98,13 +113,13 @@ public class MainController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable long id) {
         List<Microchip> microchipList = gsonService.getListFromJson();
-        Microchip microchip = getMcById(microchipList, id);
+        Microchip microchip = getMcFromListById(microchipList, id);
         microchipList.remove(microchip);
         gsonService.putListToJson(microchipList);
         return getNoContentStatus();
     }
 
-    private Microchip getMcById(List<Microchip> microchipList, long id) {
+    private Microchip getMcFromListById(List<Microchip> microchipList, long id) {
         return microchipList
                 .stream()
                 .filter(microchipItem -> microchipItem.getId() == id)
@@ -113,6 +128,12 @@ public class MainController {
     }
 
     private ResponseEntity<List<Microchip>> getNoContentStatus() {
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    private ResponseEntity<Long> getNoContentStatusForNumber() {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
@@ -128,6 +149,12 @@ public class MainController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(microchip);
+    }
+
+    private ResponseEntity<Long> getOkStatus(long amount) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(amount);
     }
 }
 
