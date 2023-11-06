@@ -21,6 +21,8 @@ public class MainController {
     @Autowired
     GsonServiceImpl gsonService;
 
+    long idCounter = 0;
+
     @GetMapping("/{id}")
     public ResponseEntity<Microchip> getById(@PathVariable long id) {
         List<Microchip> microchipList = gsonService.getListFromJson();
@@ -29,12 +31,10 @@ public class MainController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<Microchip>> getAll(
-            @RequestParam(name = "sortBy", required = false) String sortField
-    ) {
+    public ResponseEntity<List<Microchip>> getAll(@RequestParam(name = "sortBy") String sortField) {
         List<Microchip> microchipList = gsonService.getListFromJson();
-        microchipList = switch (sortField.toLowerCase()) {
-            case "id" -> microchipList
+        microchipList = switch (sortField) {
+            case "" -> microchipList
                     .stream()
                     .sorted(Comparator.comparingLong(Microchip::getId))
                     .toList();
@@ -50,15 +50,17 @@ public class MainController {
                     .stream()
                     .sorted(Comparator.comparingInt(Microchip::getPrice))
                     .toList();
+            case "voltage" -> microchipList
+                    .stream()
+                    .sorted(Comparator.comparingDouble(Microchip::getVoltage))
+                    .toList();
             default -> throw new InvalidRequestParametersException(sortField);
         };
         return getOkStatus(microchipList);
     }
 
     @GetMapping("/volt")
-    public ResponseEntity<Long> getAllByVoltage(
-            @RequestParam(name = "volt", required = false, defaultValue = "5.0") double voltage
-    ) {
+    public ResponseEntity<Long> getAmountByVoltage(@RequestParam(name = "volt") double voltage) {
         List<Microchip> microchipList = gsonService.getListFromJson();
         long mcWithVoltageAmount = microchipList
                 .stream()
@@ -74,6 +76,10 @@ public class MainController {
     public ResponseEntity<List<Microchip>> createNewByList(
             @RequestBody List<Microchip> microchipList) {
         List<Microchip> microchipListCurr = gsonService.getListFromJson();
+        microchipList = microchipList
+                .stream()
+                .peek(microchip -> microchip.setId(idCounter++))
+                .toList();
         microchipListCurr.addAll(microchipList);
         gsonService.putListToJson(microchipListCurr);
         return getCreatedStatus(microchipListCurr);
