@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
+@Deprecated
 public class JsonRepositoryGsonImpl implements JsonRepository<Microchip> {
 
     Gson gson = new Gson();
