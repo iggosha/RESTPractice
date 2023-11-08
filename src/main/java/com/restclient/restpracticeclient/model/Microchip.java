@@ -3,7 +3,9 @@ package com.restclient.restpracticeclient.model;
 import lombok.*;
 
 @Data
-@Builder
+@Builder(access = AccessLevel.PUBLIC)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Microchip {
     @Builder.Default
     private Long id = null;
