@@ -3,7 +3,7 @@ package com.myrest.restpractice.controller;
 import com.myrest.restpractice.excs.InvalidRequestParametersException;
 import com.myrest.restpractice.excs.MicrochipNotFoundException;
 import com.myrest.restpractice.model.Microchip;
-import com.myrest.restpractice.service.GsonServiceImpl;
+import com.myrest.restpractice.repository.JsonRepositoryJacksonImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,23 +16,23 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
-public class MainController {
+public class MicrochipController {
 
     @Autowired
-    GsonServiceImpl gsonService;
+    JsonRepositoryJacksonImpl jacksonRepository;
 
     long idCounter = 0;
 
     @GetMapping("/{id}")
     public ResponseEntity<Microchip> getById(@PathVariable long id) {
-        List<Microchip> microchipList = gsonService.getListFromJson();
+        List<Microchip> microchipList = jacksonRepository.getListFromJson();
         Microchip microchip = getMcFromListById(microchipList, id);
         return getOkStatus(microchip);
     }
 
     @GetMapping("/")
     public ResponseEntity<List<Microchip>> getAll(@RequestParam(name = "sortBy") String sortField) {
-        List<Microchip> microchipList = gsonService.getListFromJson();
+        List<Microchip> microchipList = jacksonRepository.getListFromJson();
         microchipList = switch (sortField) {
             case "" -> microchipList
                     .stream()
@@ -61,7 +61,7 @@ public class MainController {
 
     @GetMapping("/volt")
     public ResponseEntity<Long> getAmountByVoltage(@RequestParam(name = "volt") double voltage) {
-        List<Microchip> microchipList = gsonService.getListFromJson();
+        List<Microchip> microchipList = jacksonRepository.getListFromJson();
         long mcWithVoltageAmount = microchipList
                 .stream()
                 .filter(microchip -> microchip.getVoltage() >= voltage)
@@ -75,13 +75,13 @@ public class MainController {
     @PostMapping("/")
     public ResponseEntity<List<Microchip>> createNewByList(
             @RequestBody List<Microchip> microchipList) {
-        List<Microchip> microchipListCurr = gsonService.getListFromJson();
+        List<Microchip> microchipListCurr = jacksonRepository.getListFromJson();
         microchipList = microchipList
                 .stream()
                 .peek(microchip -> microchip.setId(idCounter++))
                 .toList();
         microchipListCurr.addAll(microchipList);
-        gsonService.putListToJson(microchipListCurr);
+        jacksonRepository.putListToJson(microchipListCurr);
         return getCreatedStatus(microchipListCurr);
     }
 
@@ -90,7 +90,7 @@ public class MainController {
             @RequestParam(name = "formerFrameType") String formerFrameType,
             @RequestParam(name = "newFrameType") String newFrameType,
             @RequestParam(name = "printOnlyReplaced", required = false, defaultValue = "true") Boolean printOnlyReplaced) {
-        List<Microchip> fullMicrochipList = gsonService.getListFromJson();
+        List<Microchip> fullMicrochipList = jacksonRepository.getListFromJson();
         List<Microchip> replacedMicrochipList = fullMicrochipList
                 .stream()
                 .filter(microchip -> microchip.getFrameType().equals(formerFrameType))
@@ -117,7 +117,7 @@ public class MainController {
             fullMicrochipList
                     .forEach(System.out::println);
         }
-        gsonService.putListToJson(fullMicrochipList);
+        jacksonRepository.putListToJson(fullMicrochipList);
         if (printOnlyReplaced) {
             return getOkStatus(replacedMicrochipList);
         } else {
@@ -127,10 +127,10 @@ public class MainController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable long id) {
-        List<Microchip> microchipList = gsonService.getListFromJson();
+        List<Microchip> microchipList = jacksonRepository.getListFromJson();
         Microchip microchip = getMcFromListById(microchipList, id);
         microchipList.remove(microchip);
-        gsonService.putListToJson(microchipList);
+        jacksonRepository.putListToJson(microchipList);
         return getNoContentStatus();
     }
 

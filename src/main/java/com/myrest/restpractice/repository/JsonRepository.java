@@ -1,8 +1,8 @@
-package com.myrest.restpractice.service;
+package com.myrest.restpractice.repository;
 
 import java.util.List;
 
-public interface GsonService<T> {
+public interface JsonRepository<T> {
 
     List<T> getListFromJson();
 
