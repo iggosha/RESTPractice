@@ -3,11 +3,13 @@ package com.restclient.restpracticeclient.client;
 import com.restclient.restpracticeclient.model.Microchip;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @FeignClient(value = "microchipClient", url = "http://localhost:8081/api")
+@Component
 public interface MicrochipClient {
 
     @GetMapping("/{id}")

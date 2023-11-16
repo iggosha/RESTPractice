@@ -19,43 +19,37 @@ public class MicrochipService {
     private final MicrochipClient microchipClient;
     private final ScannerUtils scannerUtils;
 
-    public void showMenu() {
-        System.out.println("""
-                                
-                Выберите команду:
-                1 - Вывести запись о микросхеме по id
-                2 - Вывести все записи о микросхемах
-                3 - Вывести количество записей о микросхемах где напряжение больше X вольт
-                4 - Добавить запись(-и) о микросхеме(-ах) в список
-                5 - Заменить в записи существующий тип корпуса микросхемы на новый
-                6 - Удалить микросхему по id
-                -1 - Завершить работу программы
-                """);
+    public void selectMode(String arg) {
         try {
-            selectCommand();
+            switch (arg) {
+                // id (1)
+                case "-get_id" -> serviceGetById();
+                // sortField (name)
+                case "-get_all" -> serviceGetAll();
+                // voltage (4.5)
+                case "-get_volt" -> serviceGetAmountByVoltage();
+                // fileName (mcs.json)
+                case "-post_file" -> serviceCreateNewByList(1);
+                // name (mc8051)
+                // frameType (ft5180)
+                // voltage (4.5)
+                // price (30_000)
+                case "-post_cmd" -> serviceCreateNewByList(2);
+                // former (ft5180)
+                // new (ft1508)
+                case "-put_ft" -> serviceReplaceFrameType();
+                // id (1)
+                case "-del_id" -> serviceDeleteById();
+                default -> throw new IllegalArgumentException("Неверная команда меню");
+            }
         } catch (Exception e) {
             System.err.println("Произошла ошибка при работе программы, проверьте правильность ввода");
             System.err.println("Краткие сведения об ошибке: " + e.getMessage());
-            showMenu();
         }
-    }
-
-    private void selectCommand() {
-        Integer commandNumber = scannerUtils.tryToReadInt();
-        switch (commandNumber) {
-            case 1 -> serviceGetById();
-            case 2 -> serviceGetAll();
-            case 3 -> serviceGetAmountByVoltage();
-            case 4 -> serviceCreateNewByList();
-            case 5 -> serviceReplaceFrameType();
-            case 6 -> serviceDeleteById();
-            case -1 -> System.exit(0);
-            default -> throw new IllegalArgumentException("Неверная команда меню");
-        }
-        showMenu();
     }
 
     private void serviceGetById() {
+        System.out.println("Выбран режим: Вывести запись о микросхеме по id");
         System.out.print("Введите id нужной микросхемы: ");
         Long microchipId = scannerUtils.tryToReadLong();
         Microchip microchip;
@@ -69,10 +63,15 @@ public class MicrochipService {
     }
 
     private void serviceGetAll() {
+        System.out.println("Выбран режим: Вывести с сортировкой все записи о микросхемах");
         String sortField = "";
         try {
             System.out.print("Опционально: введите название атрибута для сортировки (id/name/frameType/voltage/price): ");
             sortField = scannerUtils.readString().toLowerCase();
+            if (!sortField.equals("id") && !sortField.equals("name") && !sortField.equals("frametype")
+                    && !sortField.equals("voltage") && !sortField.equals("price") && !sortField.isBlank()) {
+                throw new IllegalArgumentException("Неверный параметр, проверьте атрибут для сортировки " + sortField);
+            }
             List<Microchip> microchipList = microchipClient.getAll(sortField);
             microchipList.forEach(System.out::println);
         } catch (FeignException.BadRequest e) {
@@ -81,6 +80,7 @@ public class MicrochipService {
     }
 
     private void serviceGetAmountByVoltage() {
+        System.out.println("Выбран режим: Вывести количество записей о микросхемах где напряжение больше X вольт");
         System.out.print("Опционально: введите нижний порог значения напряжения: ");
         Double lowestVoltage = scannerUtils.tryToReadDoubleForField();
         Long mcWithVoltageAmount = microchipClient.getAmountByVoltage(lowestVoltage);
@@ -91,14 +91,10 @@ public class MicrochipService {
         }
     }
 
-
-    private void serviceCreateNewByList() {
+    private void serviceCreateNewByList(Integer source) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Microchip> microchipList = new ArrayList<>();
-        System.out.println("Введите '1', чтобы ввести данные о новой микросхеме с помощью консоли");
-        System.out.println("Нажмите Enter, если требуется передать данные с помощью внешнего файла");
-        Double readFromConsoleIfNotFive = scannerUtils.tryToReadDoubleForField();
-        if (readFromConsoleIfNotFive == 5) {
+        if (source == 1) {
             microchipList = getMicrochipListFromFile(objectMapper);
         } else {
             addMicrochipToListFromConsole(microchipList);
@@ -128,9 +124,9 @@ public class MicrochipService {
     }
 
     private List<Microchip> getMicrochipListFromFile(ObjectMapper objectMapper) {
-        List<Microchip> microchipList;
         System.out.println("Выбран режим получения данных из файла");
         System.out.print("Введите путь к файлу: ");
+        List<Microchip> microchipList;
         String filePath = scannerUtils.readString();
         File file = new File(filePath);
         try {
@@ -143,13 +139,13 @@ public class MicrochipService {
     }
 
     private void serviceReplaceFrameType() {
+        System.out.println("Выбран режим: Заменить в записи существующий тип корпуса микросхемы на новый");
         System.out.print("Введите тип корпуса, который требуется заменить:");
         String formerFrameType = scannerUtils.readString();
         System.out.print("Введите заменяющий тип корпуса: ");
         String newFrameType = scannerUtils.readString();
         System.out.println("Опционально: Введите '1', если требуется вывести только записи с заменённым типом корпуса");
         Double printOnlyReplacedIfNotFive = scannerUtils.tryToReadDoubleForField();
-
         List<Microchip> microchipList = microchipClient
                 .replaceFrameType(formerFrameType, newFrameType, printOnlyReplacedIfNotFive != 5);
         try {
@@ -160,6 +156,7 @@ public class MicrochipService {
     }
 
     private void serviceDeleteById() {
+        System.out.println("Выбран режим: Удалить микросхему по id");
         System.out.print("Введите id микросхемы, которую требуется удалить: ");
         Long id = scannerUtils.tryToReadLong();
         try {
